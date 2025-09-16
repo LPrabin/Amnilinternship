@@ -1,8 +1,9 @@
-
-
-*
-!*.pdf
-!*.tex
-!*.py
-!*.ipynb
-!.gitignore
+/venv
+*.aux
+*.log
+*.out
+*.toc
+*.gz
+*.fdb_latexmk
+*.fls
+*.synctex.gz
