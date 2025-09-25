@@ -8,4 +8,6 @@
 *.fls
 *.synctex.gz
 /mlartifacts
+*/mlruns
+/Assignment credit card fraud detection (multi model)/credit-card-transactions-dataset
 /mlruns
