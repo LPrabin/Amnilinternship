@@ -7,6 +7,33 @@
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+/mlartifacts
+*/mlruns
+/Assignment credit card fraud detection (multi model)/credit-card-transactions-dataset
+/mlruns
+.DS_Store
+*.jpg
+*.virtual-documents
+meta.yaml
+*.runName
+*.source.name
+*.source.type
+*.source.version
+*.source.git.repoURL
+*.source.git.commitID
+*mlruns
+YOLO/kaggle/working/runs/yolov8n-vehicles3
+YOLO/kaggle/working/runs/yolov8n-vehicles2
+YOLO/kaggle/working/runs/yolov8n-vehicles
+YOLO/kaggle/working/runs/val2
+YOLO/kaggle/working/runs/val
+YOLO/kaggle/working/runs/detect/val2
+YOLO/kaggle/working/runs/detect/val
+YOLO/kaggle/working/runs/val2
+YOLO/kaggle/working/runs/yolov8n-vehicles4/results.csv
+YOLO/kaggle/working/yolov8n.pt
+YOLO/kaggle/working/yolo11n.pt
+*.avi
 */mlartifacts
 */mlruns
 /Assignment credit card fraud detection (multi model)/credit-card-transactions-dataset
