@@ -42,3 +42,5 @@ YOLO/kaggle/working/yolo11n.pt
 
 *.joblib
 /mlartifacts
+__pychache__/
+*.pyc
