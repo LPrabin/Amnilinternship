@@ -1,24 +1,30 @@
-# Core Web Frameworks
-fastapi
-uvicorn
 
-# Machine Learning Libraries
-# Specify a known stable Torch CPU version to avoid compilation issues
-torch
+huggingface-hub==0.36.0
 
-# Numerical/Utility Libraries
-numpy
-
-# Hugging Face and ONNX Optimization
-# Use newer versions of transformers and optimum that are compatible
-transformers
-optimum[onnxruntime]
-onnxruntime
-onnx
+fastapi==0.117.1
 
 
-streamlit
-requests
-psutil
-safetensors
-huggingface-hub
+numpy==2.3.3
+
+onnx==1.19.1
+onnxruntime==1.23.2
+
+optimum==2.0.0
+optimum-onnx==0.0.3
+
+psutil==7.0.0
+
+requests==2.32.5
+safetensors==0.6.2
+
+streamlit==1.51.0
+sympy==1.14.0
+
+tokenizers==0.21.4
+
+torch==2.9.1
+
+tqdm==4.67.1
+
+transformers==4.55.4
+uvicorn==0.36.0
