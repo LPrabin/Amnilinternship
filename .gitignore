@@ -39,8 +39,10 @@ YOLO/kaggle/working/yolo11n.pt
 /Assignment credit card fraud detection (multi model)/credit-card-transactions-dataset
 /mlruns
 *.joblib
-
-*.joblib
 /mlartifacts
 __pychache__/
 *.pyc
+*/all_working_files
+*/onnx_model
+
+
