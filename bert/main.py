@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-MODEL_ID = 'AlgoAlchemist/Nepali-sentiment-classification'
+MODEL_ID = 'AlgoAlchemist/nepalisentimentbert'
 # Hugging Face default cache directory
 HF_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache/huggingface/hub')
 

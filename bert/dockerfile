@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy your application code and the ONNX model directory
 COPY main.py ./
 COPY streamlit_app.py ./
-COPY onnx_model/ ./onnx_model/
+
 
 # Expose the port FastAPI runs on
 EXPOSE 8000 8001
