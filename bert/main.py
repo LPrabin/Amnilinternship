@@ -23,6 +23,7 @@ HF_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache/huggingface/hub')
 # Global variables for model and tokenizer
 ort_model = None
 tokenizer = None
+LAST_SNAPSHOT_PATH = None
 
 def is_model_downloaded_locally(model_name, cache_dir):
     """
@@ -30,7 +31,7 @@ def is_model_downloaded_locally(model_name, cache_dir):
     This prevents logging metrics during the actual network download phase.
     """
     snapshot_path = snapshot_download(model_name, cache_dir=cache_dir, local_files_only=True, revision="main")
-  
+
     return snapshot_path
 
 @app.on_event("startup")
@@ -38,9 +39,11 @@ def load_model_and_tokenizer():
     global ort_model, tokenizer
     
     is_downloaded = False
+    global LAST_SNAPSHOT_PATH
     try:
         # Check if the model files are local only. This raises an error if not found locally.
-        is_model_downloaded_locally(MODEL_ID, HF_CACHE_DIR)
+        snapshot_path = is_model_downloaded_locally(MODEL_ID, HF_CACHE_DIR)
+        LAST_SNAPSHOT_PATH = snapshot_path
         is_downloaded = True
         logger.info("Model snapshot found locally. Proceeding with logging model loading metrics.")
     except Exception as e:
@@ -59,8 +62,13 @@ def load_model_and_tokenizer():
 
     try:
         # Prefer loading from cache when possible; transformers will use the HF cache dir.
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-        ort_model = ORTModelForSequenceClassification.from_pretrained(MODEL_ID)
+        # If we have a known snapshot path, prefer loading from that local path.
+        if LAST_SNAPSHOT_PATH:
+            tokenizer = AutoTokenizer.from_pretrained(LAST_SNAPSHOT_PATH, local_files_only=True)
+            ort_model = ORTModelForSequenceClassification.from_pretrained(LAST_SNAPSHOT_PATH)
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+            ort_model = ORTModelForSequenceClassification.from_pretrained(MODEL_ID)
         logger.info("Model and tokenizer load sequence complete.")
         
     except Exception as e:
@@ -90,7 +98,7 @@ def load_model_and_tokenizer():
     else:
         logger.info(f"Model download just completed. Total time to download and load: {(end_time - start_time):.2f} seconds. Metrics not captured during download phase.")
     
-MAX_LENGTH = 64  
+MAX_LENGTH = 128
 @app.get("/")
 def read_root():
     return {"message": "Nepali Sentiment Classifier API is running."}
@@ -117,7 +125,7 @@ def predict_sentiment(text: str):
     logits = outputs.get('logits', outputs[0]) if isinstance(outputs, dict) else outputs[0]
     
     predictions = torch.argmax(torch.from_numpy(logits), dim=1).item()
-    sentiment = "Positive (1)" if predictions == 1 else "Negative (0)"
+    sentiment = "Positive (2)" if predictions == 2 else "Neutral (1)" if predictions == 1 else "Negative (0)"
 
     
 
@@ -144,11 +152,13 @@ def predict_sentiment(text: str):
 def download_model():
    
     global ort_model, tokenizer
+    global LAST_SNAPSHOT_PATH
     try:
         start = time.time()
         logger.info(f"Starting model download for {MODEL_ID} into {HF_CACHE_DIR}")
         # snapshot_download will return the path to the downloaded repo snapshot
         snapshot_path = snapshot_download(repo_id=MODEL_ID, cache_dir=HF_CACHE_DIR, revision="main")
+        LAST_SNAPSHOT_PATH = snapshot_path
 
         # Load locally from the snapshot path to ensure no network calls on future loads
         tokenizer = AutoTokenizer.from_pretrained(snapshot_path, local_files_only=True)
@@ -160,3 +170,9 @@ def download_model():
     except Exception as e:
         logger.error(f"Error downloading model: {e}")
         return JSONResponse({"status": "error", "error": str(e)}, status_code=500)
+
+
+@app.get("/status")
+def status():
+    """Return whether the model is loaded and the last snapshot path (if any)."""
+    return {"loaded": ort_model is not None and tokenizer is not None, "snapshot_path": LAST_SNAPSHOT_PATH}
