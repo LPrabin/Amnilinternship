@@ -1,4 +1,4 @@
-/venv
+*.venv
 *.aux
 *.log
 *.out
@@ -45,4 +45,5 @@ __pychache__/
 */all_working_files
 */onnx_model
 
-
+/venv
+chroma_db
