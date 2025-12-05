@@ -49,3 +49,4 @@ __pychache__/
 chroma_db
 percentile
 gradient
+.env
