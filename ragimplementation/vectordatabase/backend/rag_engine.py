@@ -10,10 +10,9 @@ from langchain_chroma import Chroma
 from dotenv import load_dotenv
 import chromadb
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-
+from langchain_core.tools import tool
 load_dotenv()
 
 PERSIST_DIRECTORY = "chroma_db"
@@ -99,7 +98,19 @@ class RAGService:
         collection = client.get_collection(notebook_name)
         collection.delete(where={"source_name": resource_name})
 
+    @tool
     def query_notebook(self, notebook_name: str, query: str):
+        """
+        Searches the specified notebook in the vector database for relevant context 
+        related to the query.
+
+        Args:
+            notebook_name: The name of the notebook collection to search.
+            query: The user's question or search term.
+
+        Returns:
+            A formatted string containing the answer and source documents.
+        """
         vectorstore = self._get_vectorstore(notebook_name)
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         docs = retriever.invoke(query)
@@ -110,15 +121,18 @@ class RAGService:
 
         llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
         
-        template = """Answer the question based only on the following context:
+        template = """("system", "You are an expert assistant that can use tools to answer questions. If you need information from a , use the `retrieve_from_notebook` tool. Otherwise, answer directly."),
+
         {context}
 
         Question: {question}
         """
-        prompt = ChatPromptTemplate.from_template(template)
-        
+        prompt = ChatPromptTemplate.format_messages(template)
+
+        agent = create_retrieval_agent(llm, retriever)
         def format_docs(docs):
             return "\n\n".join([d.page_content for d in docs])
+        
 
         chain = (
             {"context": lambda x: format_docs(docs), "question": lambda x: query}
@@ -129,3 +143,8 @@ class RAGService:
         
         answer = chain.invoke(query)
         return {"answer": answer, "sources": [d.metadata.get("source_name", "unknown") for d in docs],"top3docs": [d.page_content for d in docs]}
+
+
+tools = [
+    query_notebook,
+]

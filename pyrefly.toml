@@ -1,0 +1,17 @@
+[tool.pyrefly]
+exclude = [
+    "**/node_modules",
+    "**/venv",
+    "**/data",
+    "**/logs",
+    "**/migrations"
+    "**/chroma_db"
+    "**/mlruns"
+    "**/Assignment credit card fraud detection (multi model)"
+    "**/Assignment-MlFlow(1.1)"
+    "**/Assignment2- End to end machine learning project"
+    "**/Assignment3-Fine tune model"
+    "**/YOLO"
+    "**/unsupervised learning"
+    "**/Resnet"
+]
