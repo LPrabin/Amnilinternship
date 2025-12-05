@@ -57,7 +57,7 @@ def chunk_documents(docs: List[Document]) -> List[Document]:
     embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004")
     text_splitter = SemanticChunker(
             embeddings=embeddings,
-            breakpoint_threshold_type="percentile",
+            breakpoint_threshold_type='gradient',
             
     )
     
@@ -76,37 +76,88 @@ def create_retriver(docs: List[Document]) -> BaseRetriever:
         documents = docs,
         embedding= embeddings,
         persist_directory="chroma_db",
-        collection_name="hybrid_retriver"
+        collection_name="hybrid_retriver1"
     )
     vector_retriver = vectorstore.as_retriever(search_kwargs={"k": 5})
-    
-    #ensemble
-    
     return vector_retriver
 
-def main(directroy: str):
+def load_retriever_from_persistent_db() -> BaseRetriever:
+    print("Loading retriever from persistent Chroma DB")
+    embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004")
+    vectorstore = Chroma(
+        persist_directory="chroma_db",
+        embedding_function=embeddings,
+        collection_name="hybrid_retriver1"
+    )
+    vector_retriver = vectorstore.as_retriever(search_kwargs={"k": 5})
+    return vector_retriver
 
 
-    try:
-        docs = load(directroy)
+
+
+import typer
+from typing import Optional, List
+
+app = typer.Typer()
+
+@app.command()
+def main(
+    doc_dir: Optional[str] = typer.Option(
+        None, "--doc-dir", "-d", help="Directory containing documents to load. If not provided, queries existing DB."
+    ),
+    query: Optional[str] = typer.Option(
+      None, "--query", "-q", help="Query to run against the retriever."   
+    )
+):
+    if doc_dir :
+        print(f"Loading documents from: {doc_dir}")
+        docs = load(doc_dir)
         chunks = chunk_documents(docs)
-        retriver = create_retriver(chunks)
-
-        query = "Human Brain Perspective and Neurophysiological Motivation"
-        print(f"\n Query: {query}")
-
-        result = retriver.invoke(query)
+        retriever =create_retriver(chunks)
+        for i, doc in enumerate(chunks):
+           saveastxt = doc.page_content.replace('\n', ' ')
+           with open(f"gradient/chunk_{i}.txt", "w") as f:
+            f.write(saveastxt)
+        result = retriever.invoke(query)
         print(f"\n Retrived: {len(result)} chunks.")
 
         for i, doc in enumerate(result):
-            contentpreview = doc.page_content.replace('\n', ' ')
-            print(f"{contentpreview}------")
+           contentpreview = doc.page_content.replace('\n', ' ')
+           print(f"{contentpreview}------")
+    else:
+        print("No document directory provided. Querying existing database.")
+        print(f"\n Query: {query}")
+        retriever =load_retriever_from_persistent_db()
+        result = retriever.invoke(query)
+        print(f"\n Retrived: {len(result)} chunks.")
 
-    except Exception as e:
-        print(f"Error: {e}")
+        for i, doc in enumerate(result):
+           contentpreview = doc.page_content.replace('\n', ' ')
+           print(f"{contentpreview}------")
+
+if __name__ == "__main__":
+    app()
+
+#     try:
+#         docs = load("documents")
+#         chunks = chunk_documents(docs)
+#         retriver = create_retriver(chunks)
+
+#         query = "Human Brain Perspective and Neurophysiological Motivation"
+#         print(f"\n Query: {query}")
+
+#         result = retriver.invoke(query)
+#         print(f"\n Retrived: {len(result)} chunks.")
+
+#         for i, doc in enumerate(result):
+#             contentpreview = doc.page_content.replace('\n', ' ')
+#             print(f"{contentpreview}------")
+
+#     except Exception as e:
+#         print(f"Error: {e}")
     
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
  
-    main("documents")
+#     main()

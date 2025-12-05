@@ -47,3 +47,5 @@ __pychache__/
 
 /venv
 chroma_db
+percentile
+gradient
