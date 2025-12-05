@@ -2,6 +2,7 @@
 # bert nepali sentiment classifier
 Initial run takes time because the model from Hugging Face needs to be downloaded, size is about 500mb
 downloads automatically on startup of uvcorn
+after download completes may need to refresh for ui to display input box
 
 ## for docker run
 [may take time to build Docker](Docker file only copies necessary files so can use bert directory) \

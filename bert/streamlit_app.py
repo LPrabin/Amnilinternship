@@ -47,9 +47,7 @@ if "snapshot_path" not in st.session_state:
 cols = st.columns([2, 1])
 health_btn = cols[1].button("Health Check")
 
-# Second row: Download model (it can take minutes)
-cols2 = st.columns([2, 1])
-download_btn = cols2[1].button("Download model on backend")
+
 
 if st.session_state.get("model_loaded"):
     st.success("Model is available on backend")
